@@ -1,20 +1,25 @@
 require "http"
 require "json"
+require "uri"
 
-puts ENV.fetch("GMAPS_KEY")
+puts "Where in the world are you located ? "
 
-user_location = "Chicago"
+user_location = gets.chomp
 
-gmaps_key = ENV.fetch("GMAPS_KEY")
+puts "Current weather in #{user_location} :"
 
-gmaps_url = "https://maps.googleapis.com/maps/api/geocode/json?address=#{user_location}&key=#{gmaps_key}"
+google_maps_key = ENV.fetch("GMAPS_KEY")
 
-raw_gmaps_data = HTTP.get(gmaps_url)
+uri_encoded_location = URI.encode_uri_component(user_location)
 
-parsed_gmaps_data = JSON.parse(raw_gmaps_data, object_class: OpenStruct)
+google_maps_url = "https://maps.googleapis.com/maps/api/geocode/json?address=#{user_location}&key=#{google_maps_key}"
 
-location_latitude = parsed_gmaps_data.results[0].geometry.location.lat
-location_longitude = parsed_gmaps_data.results[0].geometry.location.lng
+raw_google_maps_data = HTTP.get(google_maps_url)
+
+parsed_map_data = JSON.parse(raw_google_maps_data, object_class: OpenStruct)
+
+location_latitude = parsed_map_data.results[0].geometry.location.lat
+location_longitude = parsed_map_data.results[0].geometry.location.lng
 
 pirate_weather_key = ENV.fetch("PIRATE_WEATHER_KEY")
 
@@ -22,6 +27,16 @@ pirate_weather_url = "https://api.pirateweather.net/forecast/#{pirate_weather_ke
 
 raw_pirate_weather_data = HTTP.get(pirate_weather_url)
 
-parsed_pirate_weather_data = JSON.parse(raw_pirate_weather_data, object_class: OpenStruct)
+weather_data = JSON.parse(raw_pirate_weather_data, object_class: OpenStruct)
 
-puts raw_pirate_weather_data
+puts "After hashing :"
+
+puts "Current temperature : #{weather_data.currently.temperature} F"
+
+puts " "
+puts "Next hour weather : "
+puts "="*40
+puts " "
+puts "Temperature #{weather_data.hourly.data[0].temperature} F"
+puts " "
+puts "Summary : #{weather_data.hourly.data[0].summary}"
