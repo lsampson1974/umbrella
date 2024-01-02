@@ -1,1 +1,1 @@
-ENV.fetch("GMAPS_KEY")
+puts ENV.fetch("GMAPS_KEY")
