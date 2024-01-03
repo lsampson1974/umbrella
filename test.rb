@@ -10,9 +10,12 @@ puts "Current weather in #{user_location} :"
 
 google_maps_key = ENV.fetch("GMAPS_KEY")
 
+# We will add this to cover cities that have spaces in their names
+# (i.e. New York)
+
 uri_encoded_location = URI.encode_uri_component(user_location)
 
-google_maps_url = "https://maps.googleapis.com/maps/api/geocode/json?address=#{user_location}&key=#{google_maps_key}"
+google_maps_url = "https://maps.googleapis.com/maps/api/geocode/json?address=#{uri_encoded_location}&key=#{google_maps_key}"
 
 raw_google_maps_data = HTTP.get(google_maps_url)
 
@@ -28,8 +31,6 @@ pirate_weather_url = "https://api.pirateweather.net/forecast/#{pirate_weather_ke
 raw_pirate_weather_data = HTTP.get(pirate_weather_url)
 
 weather_data = JSON.parse(raw_pirate_weather_data, object_class: OpenStruct)
-
-puts "After hashing :"
 
 puts "Current temperature : #{weather_data.currently.temperature} F"
 
