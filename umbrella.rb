@@ -32,6 +32,11 @@ raw_pirate_weather_data = HTTP.get(pirate_weather_url)
 
 weather_data = JSON.parse(raw_pirate_weather_data, object_class: OpenStruct)
 
+probablePrecipitation = weather_data.hourly.data[0].precipProbability*100
+
+umberella_message = probablePrecipitation >= 10.0 ? "You may need an umbrella" : "You don't need an umbrella"
+
+
 puts "Current temperature : #{weather_data.currently.temperature} F"
 
 puts " "
@@ -39,5 +44,11 @@ puts "Next hour weather : "
 puts "="*40
 puts " "
 puts "Temperature #{weather_data.hourly.data[0].temperature} F"
+puts " "
+puts "Precipitation probability : #{probablePrecipitation} %"
+
+puts " "
+puts "#{umberella_message}"
+
 puts " "
 puts "Summary : #{weather_data.hourly.data[0].summary}"
