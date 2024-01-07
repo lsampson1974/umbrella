@@ -3,6 +3,7 @@
 require "http"
 require "json"
 require "uri"
+require "ascii_charts"
 
 # Let's ask the user where they are on Earth :
 
@@ -36,8 +37,6 @@ location_longitude = parsed_map_data.results[0].geometry.location.lng
 
 pirate_weather_url = "https://api.pirateweather.net/forecast/#{pirate_weather_key}/#{location_latitude},#{location_longitude}"
 
-#raw_pirate_weather_data = HTTP.get(pirate_weather_url)
-
 weather_data = JSON.parse(HTTP.get(pirate_weather_url), object_class: OpenStruct)
 
 #------------------------------------------------------------------------------------------------------
@@ -47,5 +46,47 @@ weather_data = JSON.parse(HTTP.get(pirate_weather_url), object_class: OpenStruct
 
 # Now that we have the weather data, let's start extracting what we need to show the user :
 #------------------------------------------------------------------------------------------------------
+
+# Let's get the current temp and possible preciptation for the next hour :
+
+current_temperature = weather_data.currently.temperature
+
+possible_precip_type_next_hour = weather_data.hourly.data[0].precipType
+
+# We need a 2d array for the graph :
+
+data_points = Array.new(12) { Array.new(2) }
+
+# In order for us to graph, we have to go through the next 12 hours and
+# populate with the possible precipitation percentages for each hour, creating data points.
+# Let's create a loop specifically for this :
+
+# We're setting this as a default in case no precipitation probabilities above 10 % are found in the next
+# 12 hours.  
+hour_of_possible_precipitation = 99 
+
+# We now need to collect the precipitation probability data for the next 12 hours :
+# If at least 1 of those hours have a precipitation of > 10.0 %, then record the hour and
+# afterwards, we'll calculate the differences between now and that hour.  
+
+for hours in 0..11 do
+  data_points[hours][0] = hours+1
+  data_points[hours][1] = weather_data.hourly.data[hours].precipProbability
+
+  if data_points[hours][1] >= 10.0 
+    hour_of_possible_precipitation = hours+1
+  end
+
+end
+
+current_time = Time.now
+
+# Uncomment below to test the time calculations :
+hour_of_possible_precipitation = 5
+
+#new_time = time + 2.hours
+if hour_of_possible_precipitation != 99
+  possible_precip_time = current_time + 2.hours
+end
 
 
