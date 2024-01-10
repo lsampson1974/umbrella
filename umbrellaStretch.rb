@@ -77,8 +77,10 @@ end
 next_hour = Time.at(weather_data.hourly.data[0].time).to_i
 current_hour = Time.at(Time.now).to_i
 
-time_diff = current_hour - next_hour
+time_diff = next_hour - current_hour
 
 time_diff_minutes = Time.at(time_diff).min
 
 # We should have all of the information we need, now let's show the user :
+
+
