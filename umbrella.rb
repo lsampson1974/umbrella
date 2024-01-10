@@ -30,7 +30,7 @@ pirate_weather_url = "https://api.pirateweather.net/forecast/#{pirate_weather_ke
 
 raw_pirate_weather_data = HTTP.get(pirate_weather_url)
 
-#puts raw_pirate_weather_data
+puts raw_pirate_weather_data
 
 weather_data = JSON.parse(raw_pirate_weather_data, object_class: OpenStruct)
 

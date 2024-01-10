@@ -4,12 +4,15 @@ require "http"
 require "json"
 require "uri"
 require "ascii_charts"
+require "time_difference"
 
 # Let's ask the user where they are on Earth :
 
-puts "Where in the world are you located ? "
+#puts "Where in the world are you located ? "
 
-user_location = gets.chomp
+#user_location = gets.chomp
+
+user_location = "Chicago"
 
 # Here's where we gather the data from the APIs :
 #------------------------------------------------------------------------------------------------------
@@ -81,12 +84,5 @@ end
 
 current_time = Time.now
 
-# Uncomment below to test the time calculations :
-hour_of_possible_precipitation = 5
-
-#new_time = time + 2.hours
-if hour_of_possible_precipitation != 99
-  possible_precip_time = current_time + 2.hours
-end
 
 
