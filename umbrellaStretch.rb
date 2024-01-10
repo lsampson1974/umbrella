@@ -8,11 +8,10 @@ require "time_difference"
 
 # Let's ask the user where they are on Earth :
 
-#puts "Where in the world are you located ? "
+puts "Where in the world are you located ? "
 
-#user_location = gets.chomp
+user_location = gets.chomp
 
-user_location = "Chicago"
 
 # Here's where we gather the data from the APIs :
 #------------------------------------------------------------------------------------------------------
@@ -64,25 +63,22 @@ data_points = Array.new(12) { Array.new(2) }
 # populate with the possible precipitation percentages for each hour, creating data points.
 # Let's create a loop specifically for this :
 
-# We're setting this as a default in case no precipitation probabilities above 10 % are found in the next
-# 12 hours.  
-hour_of_possible_precipitation = 99 
 
 # We now need to collect the precipitation probability data for the next 12 hours :
-# If at least 1 of those hours have a precipitation of > 10.0 %, then record the hour and
-# afterwards, we'll calculate the differences between now and that hour.  
+
 
 for hours in 0..11 do
   data_points[hours][0] = hours+1
   data_points[hours][1] = weather_data.hourly.data[hours].precipProbability
-
-  if data_points[hours][1] >= 10.0 
-    hour_of_possible_precipitation = hours+1
-  end
-
 end
 
-current_time = Time.now
+# Next, let's calculate the minutes before the next weather event :
 
+next_hour = Time.at(weather_data.hourly.data[0].time).to_i
+current_hour = Time.at(Time.now).to_i
 
+time_diff = current_hour - next_hour
 
+time_diff_minutes = Time.at(time_diff).min
+
+# We should have all of the information we need, now let's show the user :
