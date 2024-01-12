@@ -16,7 +16,7 @@ user_location = gets.chomp
 # Here's where we gather the data from the APIs :
 #------------------------------------------------------------------------------------------------------
 
-# Let's convert the location  the user entered into something that can be used in the call to the API :
+# Let's convert the location the user entered into something that can be used in the call to the API :
 
 uri_encoded_location = URI.encode_uri_component(user_location)
 
@@ -47,8 +47,6 @@ weather_data = JSON.parse(HTTP.get(pirate_weather_url), object_class: OpenStruct
 # puts weather_data
 
 # Now that we have the weather data, let's start extracting what we need to show the user :
-#------------------------------------------------------------------------------------------------------
-
 # Let's get the current temp and possible preciptation for the next hour :
 
 current_temperature = weather_data.currently.temperature
