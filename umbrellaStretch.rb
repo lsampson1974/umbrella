@@ -53,39 +53,42 @@ weather_data = JSON.parse(HTTP.get(pirate_weather_url), object_class: OpenStruct
 
 current_temperature = weather_data.currently.temperature
 
-# We need a 2d array for the graph :
+# We need an array to hold the precipitation prediction data :
 
 data_points = Array.new(12) { Array.new(2) }
 
-# In order for us to graph, we have to go through the next 12 hours and
-# populate with the possible precipitation percentages for each hour, creating data points.
-# Let's create a loop specifically for this :
-
-
-# We now need to collect the precipitation probability data for the next 12 hours :
+# We should initialize these variables to use in calculations and
+# decisions later :
 
 timeOfPrecipProbability = 0
 time_diff_minutes = 0
 time_diff_hours = 0
 
+# Let's initialize the weather message which will eventually let the user know what they will need to bring outside :
+weather_message = " "
 
+# In order for us to graph, we have to go through the next 12 hours and
+# populate with the possible precipitation percentages for each hour, creating data points.
+# Let's create a loop specifically for this :
 
 for hours in 0..11 do
    percentagePrecipProbability = weather_data.hourly.data[hours].precipProbability*100
 
    data_points[hours] = percentagePrecipProbability
-   
 
 end
 
-
-weather_message = " "
+# We will now figure out at what hour will the precipitation prediction
+# be above 10% :
 
 for hours in 0..11 do
   if data_points[hours] >= 10.0
     timeOfPrecipProbability = weather_data.hourly.data[hours].time
         
     possible_precip_type = weather_data.hourly.data[hours].precipType
+
+# There are many types of precipitation : sleet, drizzle, etc.
+# We will stick with 2 simple ones : snow and rain.
 
     if possible_precip_type.downcase.include? "snow"
       weather_message = "You may want to take a shovel."
@@ -100,7 +103,7 @@ end
 
 
 
-# Next, let's calculate the minutes before the next weather event :
+# Next, let's calculate the hours and minutes before the next precipitation weather event if within 12 hours, the precipitation prediction is above 10 %.
 
 if timeOfPrecipProbability != 0
     next_hour = Time.at(timeOfPrecipProbability).to_i
@@ -113,6 +116,10 @@ if timeOfPrecipProbability != 0
 
 end
 
+# Lastly, let's only show the graph if the precipitation predictions says the preciptiation will be above 10 % within the next 12 hours :
+
+show_graph = false
+
 # We should have all of the information we need, now let's show the user :
 
 puts " "
@@ -120,7 +127,6 @@ puts "Checking the weather at #{user_location}"
 puts "Your coordinates are #{location_longitude}, #{location_latitude}."
 puts "It is currently #{current_temperature} °F"
 
-show_graph = false
 
 if time_diff_hours > 0 && time_diff_hours < 12
   puts "Possible #{possible_precip_type} starting in #{time_diff_hours} hour(s) and #{time_diff_minutes} min(s)."
