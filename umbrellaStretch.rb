@@ -53,8 +53,6 @@ weather_data = JSON.parse(HTTP.get(pirate_weather_url), object_class: OpenStruct
 
 current_temperature = weather_data.currently.temperature
 
-possible_precip_type_next_hour = weather_data.hourly.data[0].precipType
-
 # We need a 2d array for the graph :
 
 data_points = Array.new(12) { Array.new(2) }
@@ -66,21 +64,81 @@ data_points = Array.new(12) { Array.new(2) }
 
 # We now need to collect the precipitation probability data for the next 12 hours :
 
+timeOfPrecipProbability = 0
+time_diff_minutes = 0
+time_diff_hours = 0
+
+
 
 for hours in 0..11 do
-  data_points[hours][0] = hours+1
-  data_points[hours][1] = weather_data.hourly.data[hours].precipProbability
+   percentagePrecipProbability = weather_data.hourly.data[hours].precipProbability*100
+
+   data_points[hours] = percentagePrecipProbability
+   
+
 end
+
+
+weather_message = " "
+
+for hours in 0..11 do
+  if data_points[hours] >= 10.0
+    timeOfPrecipProbability = weather_data.hourly.data[hours].time
+        
+    possible_precip_type = weather_data.hourly.data[hours].precipType
+
+    if possible_precip_type.downcase.include? "snow"
+      weather_message = "You may want to take a shovel."
+    elsif possible_precip_type.downcase.include? "rain"
+      weather_message = "You may want to bring an umbrella."
+    end
+
+    break
+  end  
+
+end
+
+
 
 # Next, let's calculate the minutes before the next weather event :
 
-next_hour = Time.at(weather_data.hourly.data[0].time).to_i
-current_hour = Time.at(Time.now).to_i
+if timeOfPrecipProbability != 0
+    next_hour = Time.at(timeOfPrecipProbability).to_i
+    current_hour = Time.at(Time.now).to_i
 
-time_diff = next_hour - current_hour
+    time_diff = next_hour - current_hour
 
-time_diff_minutes = Time.at(time_diff).min
+    time_diff_minutes = Time.at(time_diff).min
+    time_diff_hours = Time.at(time_diff).hour
+
+end
 
 # We should have all of the information we need, now let's show the user :
 
+puts " "
+puts "Checking the weather at #{user_location}"
+puts "Your coordinates are #{location_longitude}, #{location_latitude}."
+puts "It is currently #{current_temperature} °F"
 
+show_graph = false
+
+if time_diff_hours > 0 && time_diff_hours < 12
+  puts "Possible #{possible_precip_type} starting in #{time_diff_hours} hour(s) and #{time_diff_minutes} min(s)."
+  show_graph = true
+
+elsif time_diff_minutes > 0 
+  puts "Possible #{possible_precip_type} starting in #{time_diff_minutes} min(s)."
+  show_graph = true
+
+else
+  puts "No precipitation predicted for the next 12 hours."
+
+end  
+
+puts " "
+
+if show_graph
+  puts AsciiCharts::Cartesian.new((0...12).to_a.map{|hours| [hours+1, data_points[hours]]}, :title => 'Hours from now vs Precipitation probability', :bar => true).draw
+end
+
+puts weather_message
